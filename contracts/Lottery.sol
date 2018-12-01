@@ -26,7 +26,7 @@ contract Lottery {
         players.push(msg.sender);
     }
     
-    function pickWInner() public isManager {
+    function pickWinner() public isManager {
         uint index = random() % players.length;
         players[index].transfer(address(this).balance);
         players = new address[](0);

@@ -97,7 +97,7 @@ describe('Lotery Contract', () => {
 
         let errorOccurred = false;
         try {
-            await lottery.methods.pickWInner().send({
+            await lottery.methods.pickWinner().send({
                 from: accounts[1],
                 gas: '3000000'
             });
@@ -108,7 +108,7 @@ describe('Lotery Contract', () => {
 
         errorOccurred = false;
         try {
-            await lottery.methods.pickWInner().send({
+            await lottery.methods.pickWinner().send({
                 from: accounts[0],
                 gas: '3000000'
             });
@@ -127,7 +127,7 @@ describe('Lotery Contract', () => {
 
         const initialBalance = await web3.eth.getBalance(accounts[0]);
 
-        await lottery.methods.pickWInner().send({
+        await lottery.methods.pickWinner().send({
             from: accounts[0],
             gas: '3000000'
         });
