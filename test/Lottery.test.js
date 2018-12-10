@@ -19,10 +19,10 @@ beforeEach(async () => {
 
     //Use one of the accounts to deploy contract
     lottery = await new web3.eth.Contract(JSON.parse(interface)).deploy({
-        data: bytecode
+        data: '0x' + bytecode
     }).send({
         from: accounts[0],
-        gas: '3000000'
+        gas: '1000000'
     });
 
     lottery.setProvider(provider);
@@ -41,7 +41,6 @@ describe('Lotery Contract', () => {
     it('allows one account to enter', async () => {
         await lottery.methods.enter().send({
             from: accounts[0],
-            gas: '3000000',
             value: web3.utils.toWei('.0101', 'ether')
         });
 
@@ -57,7 +56,6 @@ describe('Lotery Contract', () => {
         for (let i = 0; i < numberOfAccounts; i++) {
             await lottery.methods.enter().send({
                 from: accounts[i],
-                gas: '3000000',
                 value: web3.utils.toWei('.0101', 'ether')
             });
         }
@@ -76,7 +74,6 @@ describe('Lotery Contract', () => {
         try {
             await lottery.methods.enter().send({
                 from: accounts[0],
-                gas: '3000000',
                 value: web3.utils.toWei('.001', 'ether')
             });
         } catch (err) {
@@ -90,16 +87,14 @@ describe('Lotery Contract', () => {
         for (let i = 0; i < numberOfAccounts; i++) {
             await lottery.methods.enter().send({
                 from: accounts[i],
-                gas: '3000000',
                 value: web3.utils.toWei('.0101', 'ether')
             });
         }
 
         let errorOccurred = false;
         try {
-            await lottery.methods.pickWInner().send({
+            await lottery.methods.pickWinner().send({
                 from: accounts[1],
-                gas: '3000000'
             });
         } catch (err) {
             errorOccurred = true;
@@ -108,9 +103,8 @@ describe('Lotery Contract', () => {
 
         errorOccurred = false;
         try {
-            await lottery.methods.pickWInner().send({
-                from: accounts[0],
-                gas: '3000000'
+            await lottery.methods.pickWinner().send({
+                from: accounts[0]
             });
         } catch (err) {
             errorOccurred = true;
@@ -121,26 +115,34 @@ describe('Lotery Contract', () => {
     it('sends money to winner and resets contract', async () => {
         await lottery.methods.enter().send({
             from: accounts[0],
-            gas: '3000000',
             value: web3.utils.toWei('2', 'ether')
         });
 
         const initialBalance = await web3.eth.getBalance(accounts[0]);
 
-        await lottery.methods.pickWInner().send({
-            from: accounts[0],
-            gas: '3000000'
+        await lottery.methods.pickWinner().send({
+            from: accounts[0]
         });
 
         const finalBalance = await web3.eth.getBalance(accounts[0]);
         assert(finalBalance - initialBalance > web3.utils.toWei('1.99', 'ether'));
 
-        const players = await lottery.methods.getPlayers().call({
-            from: accounts[0]
-        });
+        const players = await lottery.methods.getPlayers().call();
         assert.equal(0, players.length);
 
         const lotteryBalance = await web3.eth.getBalance(lottery.options.address);
         assert.equal(0, lotteryBalance);
+    });
+
+    it('has last winner', async () => {
+        await lottery.methods.enter().send({
+            from: accounts[1],
+            value: web3.utils.toWei('2', 'ether')
+        });
+        await lottery.methods.pickWinner().send({
+            from: accounts[0]
+        });
+        const lastWinner = await lottery.methods.lastWinner().call();
+        assert.equal(accounts[1], lastWinner);
     });
 });
