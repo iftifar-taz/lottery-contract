@@ -22,4 +22,5 @@ const deploy = async () => {
     console.log(interface);
     console.log('Contract deployed to: ' + result.options.address);
 };
+
 deploy();
