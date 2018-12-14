@@ -1,21 +1,21 @@
-pragma solidity ^0.4.25;
+pragma solidity >= 0.5.1 <0.6.0;
 
 contract Lottery {
     address public manager;
     address public lastWinner;
-    address[] public players;
+    address payable[] public players;
     
     constructor() public {
         manager = msg.sender;
     }
     
     modifier isManager() {
-        require(msg.sender == manager);
+        assert(msg.sender == manager);
         _;
     }
     
     modifier hasMinEther() {
-        require(msg.value > .01 ether);
+        assert(msg.value > .01 ether);
         _;
     }
     
@@ -29,12 +29,12 @@ contract Lottery {
     
     function pickWinner() public isManager {
         uint index = random() % players.length;
-        players[index].transfer(address(this).balance);
+        address(players[index]).transfer(address(this).balance);
         lastWinner = players[index];
-        players = new address[](0);
+        players = new address payable[](0);
     }
     
-    function getPlayers() public view returns(address[]) {
+    function getPlayers() public view returns(address payable[] memory) {
         return players;
     }
 }
